@@ -14,7 +14,7 @@ def start(message):
     bot.reply_to(message, "Hello, " + message.from_user.first_name)
 
 
-@server.route("/" + TOKEN, method=["POST"])
+@server.route('/' + TOKEN, methods=['POST'])
 def get_message():
     json_string = request.get_data().decode("utf-8")
     update = telebot.types.Update.de_json(json_string)
@@ -22,7 +22,7 @@ def get_message():
     return "!", 200
 
 
-@server.route("/")
+@server.route('/')
 def webhook():
     bot.remove_webhook()
     bot.set_webhook(url=APP_URL)
