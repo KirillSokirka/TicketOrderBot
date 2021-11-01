@@ -4,7 +4,6 @@ from flask import Flask, request
 
 TOKEN = "2089991556:AAFb0igp6cEFMoKKTq7Wdcg9JIDTPEExzDU"
 APP_URL = f"https://tickeeeeter.herokuapp.com/{TOKEN}"
-
 bot = telebot.TeleBot(TOKEN)
 server = Flask(__name__)
 
@@ -34,5 +33,4 @@ def webhook():
     return "!", 200
 
 
-if __name__ == "__main__":
-    server.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+server.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
