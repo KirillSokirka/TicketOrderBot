@@ -2,9 +2,8 @@ import os
 import telebot
 from flask import Flask, request
 
-TOKEN = "2089991556:AAFb0igp6cEFMoKKTq7Wdcg9JIDTPEExzDU"
-APP_URL = f"https://tickeeeeter.herokuapp.com/{TOKEN}"
-bot = telebot.TeleBot(TOKEN)
+
+bot = telebot.TeleBot(os.environ.get('TOKEN'))
 server = Flask(__name__)
 
 
@@ -18,7 +17,7 @@ def echo(message):
     bot.reply_to(message, message.text)
 
 
-@server.route('/' + TOKEN, methods=['POST'])
+@server.route('/' + os.environ.get('TOKEN'), methods=['POST'])
 def get_message():
     json_string = request.get_data().decode("utf-8")
     update = telebot.types.Update.de_json(json_string)
@@ -29,8 +28,12 @@ def get_message():
 @server.route('/')
 def webhook():
     bot.remove_webhook()
-    bot.set_webhook(url=APP_URL)
+    bot.set_webhook(url=os.environ.get('APP_URL'))
     return "!", 200
 
 
+uri = os.environ.get('DATABASE_URL')
+if uri.startswith("postgres://"):
+    uri = uri.replace("postgres://", "postgresql://", 1)
+server.config['SQLALCHEMY_DATABASE_URI'] = uri
 server.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
