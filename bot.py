@@ -37,5 +37,6 @@ uri = os.environ.get('DATABASE_URL')
 if uri.startswith("postgres://"):
     uri = uri.replace("postgres://", "postgresql://", 1)
 server.config['SQLALCHEMY_DATABASE_URI'] = uri
+server.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(server)
 server.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
