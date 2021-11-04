@@ -1,3 +1,5 @@
+from dao import initialize_db
+
 import os
 import telebot
 from flask import Flask, request
@@ -5,7 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 bot = telebot.TeleBot(os.environ.get('TOKEN'))
 server = Flask(__name__)
-db = SQLAlchemy(server)
+
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -31,10 +33,6 @@ def webhook():
     bot.set_webhook(url=os.environ.get('APP_URL'))
     return "!", 200
 
-
-uri = os.environ.get('DATABASE_URL')
-if uri.startswith("postgres://"):
-    uri = uri.replace("postgres://", "postgresql://", 1)
-
-server.config['SQLALCHEMY_DATABASE_URI'] = uri
+initialize_db()
+db = SQLAlchemy(server)
 server.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
