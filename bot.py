@@ -2,14 +2,19 @@ from config import *
 from models.user import User
 
 import telebot
-from flask import request, Flask
+from flask import request
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    bot.reply_to(message, "Hello, " + message.from_user.first_name)
+    bot.send_animation(message.from_user.id, open(HelloSticker, 'rb'))
+    bot.send_message(message.from_user.id, "Привіт, " + message.from_user.first_name +
+                 "Я - <b>Ticketeeeer</b>! З моєю допомогою ти зможеш купувати*"
+                 " квитки на різноманітні круті івенти. "
+                 "Перед використанням, ознайомтеся, будь ласка, з доступним командами",
+                 parse_mode='html')
 
 
 @bot.message_handler(commands=['register'])
@@ -25,6 +30,15 @@ def complete_registration(message):
     user = User(id=message.from_user.id, username=message.from_user.first_name, email=mail)
     db.session.add(user)
     db.session.commit()
+    bot.send_message(message.from_user.id, "Реєстрація пройшла успішно!\n"
+                                           "Тепер ви можете приступити до покупки квитків")
+
+
+@bot.message_handler(content_types='text')
+def respond_to_absurd(message):
+    bot.send_animation(message.from_user.id, open(UnknownText, 'rb'))
+    bot.send_message(message.from_user.id, "Вибач, але я не знаю, що ти маєш на увазі :(")
+    pass
 
 
 @app.route('/' + BOT_TOKEN, methods=['POST'])
@@ -43,7 +57,6 @@ def webhook():
 
 
 if __name__ == "__main__":
-
     if ENV == 'dev':
         bot.remove_webhook()
         bot.polling(none_stop=True)
