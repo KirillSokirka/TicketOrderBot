@@ -11,9 +11,9 @@ bot = telebot.TeleBot(BOT_TOKEN)
 def start(message):
     bot.send_animation(message.from_user.id, open(HelloSticker, 'rb'))
     bot.send_message(message.from_user.id, "Привіт, " + message.from_user.first_name +
-                 "Я - <b>Ticketeeeer</b>! З моєю допомогою ти зможеш купувати*"
+                 "\nЯ - <b>Ticketeeeer</b>! З моєю допомогою ти зможеш купувати*"
                  " квитки на різноманітні круті івенти. "
-                 "Перед використанням, ознайомтеся, будь ласка, з доступним командами",
+                 "\nПеред використанням, ознайомтеся, будь ласка, з доступним командами.",
                  parse_mode='html')
 
 
@@ -22,6 +22,7 @@ def register(message):
     bot.send_message(message.from_user.id,
                      'Ввведіть свій email за форматом: <b>Email: example@exmpl.ex</b>',
                      parse_mode='html')
+
 
 
 @bot.message_handler(regexp=('Email: [A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}'))
