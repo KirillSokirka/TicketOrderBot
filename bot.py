@@ -56,4 +56,5 @@ if ENV == 'dev':
     bot.remove_webhook()
     bot.polling(none_stop=True)
 else:
+    app.debug = False
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
