@@ -1,5 +1,5 @@
 from Models.User import User
-from setup import server, db
+from setup import app, db
 
 import os
 import telebot
@@ -28,7 +28,7 @@ def complete_registration(message):
     db.session.commit()
 
 
-@server.route('/' + os.environ.get('TOKEN'), methods=['POST'])
+@app.route('/' + os.environ.get('TOKEN'), methods=['POST'])
 def get_message():
     json_string = request.get_data().decode("utf-8")
     update = telebot.types.Update.de_json(json_string)
@@ -36,11 +36,11 @@ def get_message():
     return "!", 200
 
 
-@server.route('/')
+@app.route('/')
 def webhook():
     bot.remove_webhook()
     bot.set_webhook(url=os.environ.get('APP_URL'))
     return "!", 200
 
 
-server.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
