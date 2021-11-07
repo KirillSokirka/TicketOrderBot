@@ -52,8 +52,8 @@ if __name__ == "__main__":
         create_database(FINAL_DB_URL)
     db.create_all()
 
-    if ENV == 'dev':
-        bot.remove_webhook()
-        bot.polling(none_stop=True)
-    else:
-        app.run(host='0.0.0.0', port=8443)
+if ENV == 'dev':
+    bot.remove_webhook()
+    bot.polling(none_stop=True)
+else:
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
