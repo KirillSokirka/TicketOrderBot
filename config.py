@@ -13,8 +13,8 @@ if ENV == 'dev':
     app.config['SQLALCHEMY_DATABASE_URI'] = LOCAL_DB
 else:
     uri = HEROKU_DB
-    if uri.startswith("postgres://"):
-        uri = uri.replace("postgres://", "postgresql://")
+    if uri.startswith("postgres"):
+        uri = uri.replace("postgres", "postgresql+psycopg2")
     app.config['SQLALCHEMY_DATABASE_URI'] = uri
 
 FINAL_DB_URL = app.config['SQLALCHEMY_DATABASE_URI']
