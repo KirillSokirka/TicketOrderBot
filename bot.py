@@ -3,7 +3,6 @@ from models.user import User
 
 import telebot
 from flask import request, Flask
-from flask_sqlalchemy import SQLAlchemy
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
@@ -44,7 +43,6 @@ def webhook():
 
 
 if __name__ == "__main__":
-
 
     if ENV == 'dev':
         bot.remove_webhook()
