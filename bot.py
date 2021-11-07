@@ -45,16 +45,10 @@ def webhook():
 
 if __name__ == "__main__":
 
-    from sqlalchemy_utils import database_exists, drop_database, create_database
-    if database_exists(FINAL_DB_URL):
-        drop_database(FINAL_DB_URL)
-    if not database_exists(FINAL_DB_URL):
-        create_database(FINAL_DB_URL)
-    db.create_all()
 
-if ENV == 'dev':
-    bot.remove_webhook()
-    bot.polling(none_stop=True)
-else:
-    app.debug = False
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    if ENV == 'dev':
+        bot.remove_webhook()
+        bot.polling(none_stop=True)
+    else:
+        app.debug = False
+        app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
