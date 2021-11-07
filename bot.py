@@ -1,11 +1,11 @@
+from Models.User import User
+from setup import server, db
 
 import os
 import telebot
-from flask import Flask, request
-from flask_sqlalchemy import SQLAlchemy
+from flask import request
 
 bot = telebot.TeleBot(os.environ.get('TOKEN'))
-server = Flask(__name__)
 
 
 @bot.message_handler(commands=['start'])
@@ -13,9 +13,19 @@ def start(message):
     bot.reply_to(message, "Hello, " + message.from_user.first_name)
 
 
-@bot.message_handler(func=lambda message: True, content_types=['text'])
-def echo(message):
-    bot.reply_to(message, message.text)
+@bot.message_handler(commands=['register'])
+def register(message):
+    bot.send_message(message.from_user.id,
+                     'Ввведіть свій email за форматом: <b>Email: example@exmpl.ex</b>',
+                     parse_mode='html')
+
+
+@bot.message_handler(regexp=('Email: [A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}'))
+def complete_registration(message):
+    mail = message.text.split(' ')[1]
+    user = User(id=message.from_user.id, username=message.from_user.username, email=mail)
+    db.session.add(user)
+    db.session.commit()
 
 
 @server.route('/' + os.environ.get('TOKEN'), methods=['POST'])
@@ -33,10 +43,4 @@ def webhook():
     return "!", 200
 
 
-uri = os.environ.get('DATABASE_URL')
-if uri.startswith("postgres://"):
-    uri = uri.replace("postgres://", "postgresql://", 1)
-server.config['SQLALCHEMY_DATABASE_URI'] = uri
-server.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(server)
 server.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
