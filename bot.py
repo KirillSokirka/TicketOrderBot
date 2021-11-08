@@ -1,34 +1,14 @@
 from config import *
 from models.Event import Event
+from models.User import User
 
 import telebot
 import datetime
 from flask import request
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
+
 
 bot = telebot.TeleBot(BOT_TOKEN)
 event = Event
-
-ENV = 'prod'
-
-app = Flask(__name__)
-if ENV == 'dev':
-    app.config['SQLALCHEMY_DATABASE_URI'] = LOCAL_DB
-else:
-    uri = HEROKU_DB
-    if uri.startswith("postgres"):
-        uri = uri.replace("postgres", "postgresql+psycopg2")
-    app.config['SQLALCHEMY_DATABASE_URI'] = uri
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-
-
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(200), unique=False, nullable=False)
-    email = db.Column(db.String(200), unique=False, nullable=False)
-    admin = db.Column(db.BOOLEAN, unique=False, nullable=True)
 
 
 @bot.message_handler(commands=['start'])
