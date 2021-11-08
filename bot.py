@@ -1,11 +1,14 @@
+import datetime
+
 from config import *
-from models.user import User
+from models.User import User
+from models.Event import Event
 
 import telebot
 from flask import request
 
 bot = telebot.TeleBot(BOT_TOKEN)
-
+event = Event
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -24,7 +27,6 @@ def register(message):
                      parse_mode='html')
 
 
-
 @bot.message_handler(regexp=('Email: [A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}'))
 def complete_registration(message):
     mail = message.text.split(' ')[1]
@@ -35,10 +37,27 @@ def complete_registration(message):
                                            "Тепер ви можете приступити до покупки квитків")
 
 
+@bot.message_handler(commands=["admin"])
+def start_as_admin(message):
+    user = User.query.filter_by(id=message.from_user.id).first()
+    if not user:
+        bot.send_message(message.from_user.id, "Спочатку зареєструйся")
+    bot.send_message(message.from_user.id, "Введи данні, щоб продовжити як адмінстратор, за форматом:\n"
+                                           "Admin: username|Password: ****")
+
+
+@bot.message_handler(regexp=('Admin: admin|Password: admin'))
+def create_event(message):
+
+    user = User.query.filter_by(id=message.from_user.id).first()
+    user.admin = True
+    pass
+
+
 @bot.message_handler(content_types='text')
 def respond_to_absurd(message):
-    bot.send_animation(message.from_user.id, open(UnknownText, 'rb'))
-    bot.send_message(message.from_user.id, "Вибач, але я не знаю, що ти маєш на увазі :(")
+    # bot.send_animation(message.from_user.id, open(UnknownText, 'rb'))
+    # bot.send_message(message.from_user.id, "Вибач, але я не знаю, що ти маєш на увазі :(")
     pass
 
 
