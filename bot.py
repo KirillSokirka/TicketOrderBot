@@ -52,11 +52,7 @@ def start_as_admin(message):
 def create_event(message):
     user = User.query.filter_by(id=message.from_user.id).first()
     user.admin = True
-    event.event_id = 1
-    event.name = "Blayat"
-    event.date = datetime.date.today()
-    event.number_of_ticket = 120
-    event.save_to_file()
+    event = Event(1, "test", 120, datetime.date.today())
     pass
 
 

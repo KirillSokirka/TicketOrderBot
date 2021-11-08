@@ -5,6 +5,13 @@ class Event:
 
     __json_file = "json_files/events.json"
 
+    def __init__(self, id, name, number_of_tickets, date):
+        self.event_id = id
+        self.name = name
+        self.number_of_ticket = number_of_tickets
+        self.date = date
+        self.save_to_file()
+
     @property
     def event_id(self):
         return self.__event_id
