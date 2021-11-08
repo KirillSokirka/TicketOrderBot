@@ -1,2 +1,2 @@
-from config import db
+from bot import db
 db.create_all()
