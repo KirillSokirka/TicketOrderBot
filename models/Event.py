@@ -47,7 +47,7 @@ class Event:
             raise TypeError
         self.__date = value
 
-    def __save_to_file(self):
+    def save_to_file(self):
         with open(Event.__json_file, "r+") as f:
             data = json.load(f)
             data.append(self.__dict__())

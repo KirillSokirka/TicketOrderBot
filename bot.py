@@ -42,22 +42,27 @@ def start_as_admin(message):
     user = User.query.filter_by(id=message.from_user.id).first()
     if not user:
         bot.send_message(message.from_user.id, "Спочатку зареєструйся")
+        return None
     bot.send_message(message.from_user.id, "Введи данні, щоб продовжити як адмінстратор, за форматом:\n"
                                            "Admin: username|Password: ****")
 
 
 @bot.message_handler(regexp=('Admin: admin|Password: admin'))
 def create_event(message):
-
     user = User.query.filter_by(id=message.from_user.id).first()
     user.admin = True
+    event.event_id = 1
+    event.name = "Blayat"
+    event.date = datetime.date.today()
+    event.number_of_ticket = 120
+    event.save_to_file()
     pass
 
 
 @bot.message_handler(content_types='text')
 def respond_to_absurd(message):
-    # bot.send_animation(message.from_user.id, open(UnknownText, 'rb'))
-    # bot.send_message(message.from_user.id, "Вибач, але я не знаю, що ти маєш на увазі :(")
+    bot.send_animation(message.from_user.id, open(UnknownText, 'rb'))
+    bot.send_message(message.from_user.id, "Вибач, але я не знаю, що ти маєш на увазі :(")
     pass
 
 
