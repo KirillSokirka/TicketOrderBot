@@ -10,7 +10,7 @@ from flask_sqlalchemy import SQLAlchemy
 bot = telebot.TeleBot(BOT_TOKEN)
 event = Event
 
-ENV = 'dev'
+ENV = 'prod'
 
 app = Flask(__name__)
 if ENV == 'dev':
