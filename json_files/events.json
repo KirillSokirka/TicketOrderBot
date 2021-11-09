@@ -2,7 +2,13 @@
   {
     "id": 1,
     "name": "test",
-    "number_of_tickets": 1,
-    "date": "08/11/21"
+    "number_of_tickets": 120,
+    "date": "09/11/21"
+  },
+  {
+    "id": 1,
+    "name": "test",
+    "number_of_tickets": 120,
+    "date": "09/11/21"
   }
 ]

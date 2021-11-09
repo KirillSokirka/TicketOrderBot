@@ -1,6 +1,7 @@
 from config import *
 from models.Event import Event
 from models.User import User
+from s3manager import upload_object
 
 import telebot
 import datetime
@@ -51,8 +52,13 @@ def start_as_admin(message):
 @bot.message_handler(regexp=('Admin: admin|Password: admin'))
 def create_event(message):
     user = User.query.filter_by(id=message.from_user.id).first()
+    if not user:
+        bot.send_message(message.from_user.id, "Спочатку зареєструйся")
+        return None
     user.admin = True
     event = Event(1, "test", 120, datetime.date.today())
+    upload_object('json_files/events.json')
+    bot.send_message(message.from_user.id, "ok")
     pass
 
 
