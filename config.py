@@ -9,7 +9,7 @@ APP_URL = f'https://ticketeeeeeeeeeeeeeeeeer.herokuapp.com/{BOT_TOKEN}'
 LOCAL_DB = 'postgresql+psycopg2://postgres:aa6400vt@localhost:5432/ticketsdb'
 HEROKU_DB = os.getenv('DATABASE_URL')
 
-ENV = 'dev'
+ENV = 'prod'
 app = Flask(__name__)
 if ENV == 'dev':
     app.config['SQLALCHEMY_DATABASE_URI'] = LOCAL_DB
