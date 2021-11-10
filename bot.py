@@ -58,8 +58,13 @@ def start_as_admin(message):
     bot.send_message(message.from_user.id, "Введи данні, щоб продовжити як адмінстратор, за форматом:\n"
                                            "Admin: username|Password: ****")
 
+
 @bot.message_handler(commands=['tickets'])
 def get_all_tickets(message):
+    user = User.query.filter_by(id=message.from_user.id).first()
+    if not user:
+        bot.send_message(message.from_user.id, "Спочатку зареєструйся")
+        return None
     list_of_tickets_dict = JSONWorker.get_list_of_object_by_key('json_files/tickets.json', 'name_of_buyer', message.from_user.first_name)
     if len(list_of_tickets_dict) == 0:
         bot.send_message(message.from_user.id, 'Ти ще не купив жодного квитка')
