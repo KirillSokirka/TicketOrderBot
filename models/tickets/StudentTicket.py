@@ -1,12 +1,11 @@
+from helpers.jsonWorker import JSONWorker
 from models.tickets.Ticket import Ticket
 
 
-class RegularTicket(Ticket):
+class StudentTicket(Ticket):
 
-    __filename = 'json_files/tickets.json'
-
-    def __init__(self, price, event_id, name_of_buyer, date_of_buy, type='regular_ticket', code=None):
-        super(RegularTicket, self).__init__(code, name_of_buyer, event_id, date_of_buy)
+    def __init__(self, price, event_id, name_of_buyer, date_of_buy, type='student_ticket', code=None):
+        super(StudentTicket, self).__init__(code, name_of_buyer, event_id, date_of_buy)
         self.price = price
         self.type = type
 
@@ -16,11 +15,15 @@ class RegularTicket(Ticket):
 
     @price.setter
     def price(self, value):
-        if not isinstance(value, int):
-            raise TypeError
-        if value <= 0:
-            raise ValueError
-        self.__price = value
+        codes = JSONWorker.get_list_of_parameter_values('json_files/tickets.json', 'code')
+        if not codes or self.code not in codes:
+            if not isinstance(value, int):
+                raise TypeError
+            if value <= 0:
+                raise ValueError
+            self.__price = int(0.5 * value)
+        else:
+            self.__price = value
 
     @property
     def type(self):
@@ -41,7 +44,7 @@ class RegularTicket(Ticket):
                f'<b>ціна</b> - {self.__price}\n'
 
     def __dict__(self):
-        _dict = super(RegularTicket, self).__dict__()
+        _dict = super(StudentTicket, self).__dict__()
         _dict['price'] = self.__price
         _dict['type'] = self.__type
         return _dict

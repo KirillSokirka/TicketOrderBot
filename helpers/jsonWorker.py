@@ -19,6 +19,23 @@ class JSONWorker:
         return parameters
 
     @staticmethod
+    def get_list_of_object_by_key(json_filename, parameter_name, key):
+        """
+        func to get list oj objects by param name:
+        :param json_filename: name of json file
+        :param parameter_name: name of parametr which u will use to get list_of_objects
+        :param key: key value
+        :return:
+        """
+        objs = []
+        with open(json_filename, 'r') as file:
+            data = json.loads(file.read())
+            for obj in data:
+                if obj[parameter_name] == key:
+                    objs.append(obj)
+        return objs
+
+    @staticmethod
     def get_event_by_param_value(json_filename, param, value):
         """
         will correctly works only with id and name
@@ -64,3 +81,33 @@ class JSONWorker:
                 if event[name_of_param] == value:
                     return False
         return True
+
+    @staticmethod
+    def update_value(json_filename, name_of_key_value ,obj_id_to_update, name_to_update, new_value):
+        """
+        update a specific value in object to a new value
+        :param json_filename: json which should be updated
+        :param name_of_key_value: name of specific value
+        :param obj_id_to_update: object which value we should update
+        :param name_to_update: name of pdram which ll be updated
+        :param new_value: new value
+        :return: True if everything correct
+        """
+        with open(json_filename, 'r') as file:
+            data = json.loads(file.read())
+            for obj in data:
+                if obj[name_of_key_value] == obj_id_to_update:
+                    obj[name_to_update] = new_value
+                    break
+        with open(json_filename, 'w') as file:
+            file.seek(0)
+            json.dump(data, file, indent=2)
+        return True
+
+    @staticmethod
+    def save_to_json(filename, obj):
+        with open(filename, "r+") as f:
+            data = json.load(f)
+            data.append(obj.__dict__())
+            f.seek(0)
+            json.dump(data, f, indent=2)

@@ -7,6 +7,7 @@ session = boto3.Session(
     aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'))
 s3 = session.resource('s3')
 
+
 class S3Manager:
 
     @staticmethod
@@ -15,4 +16,4 @@ class S3Manager:
 
     @staticmethod
     def upload_object(file_name, key):
-        object = s3.Object(os.getenv('AWS_STORAGE_BUCKET_NAME'), key).upload_file(Filename='../json_files/events.json')
+        s3.Object(os.getenv('AWS_STORAGE_BUCKET_NAME'), key).upload_file(Filename=file_name)

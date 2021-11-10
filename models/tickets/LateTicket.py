@@ -1,12 +1,12 @@
 from models.tickets.Ticket import Ticket
 
 
-class RegularTicket(Ticket):
+class LateTicket(Ticket):
 
     __filename = 'json_files/tickets.json'
 
-    def __init__(self, price, event_id, name_of_buyer, date_of_buy, type='regular_ticket', code=None):
-        super(RegularTicket, self).__init__(code, name_of_buyer, event_id, date_of_buy)
+    def __init__(self, price, event_id, name_of_buyer, date_of_buy, type='late_ticket', code=None):
+        super(LateTicket, self).__init__(code, name_of_buyer, event_id, date_of_buy)
         self.price = price
         self.type = type
 
@@ -16,11 +16,11 @@ class RegularTicket(Ticket):
 
     @price.setter
     def price(self, value):
-        if not isinstance(value, int):
-            raise TypeError
-        if value <= 0:
-            raise ValueError
-        self.__price = value
+            if not isinstance(value, int):
+                raise TypeError
+            if value <= 0:
+                raise ValueError
+            self.__price = int(value + 0.1 * value)
 
     @property
     def type(self):
@@ -40,8 +40,9 @@ class RegularTicket(Ticket):
                f'<b>дата покупки</b> - {self.date_of_buy.strftime("%d/%m/%y")}\n' + \
                f'<b>ціна</b> - {self.__price}\n'
 
+
     def __dict__(self):
-        _dict = super(RegularTicket, self).__dict__()
+        _dict = super(LateTicket, self).__dict__()
         _dict['price'] = self.__price
         _dict['type'] = self.__type
         return _dict
