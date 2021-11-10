@@ -143,10 +143,10 @@ def add_event_number_of_tickets(message):
         bot.send_message(message.from_user.id, "Щось пішло не так, спробуй ще")
         return None
     bot.send_message(message.from_user.id, "Введіть дату проведення за форматом:\n"
-                                           "<b>Date: dd/mm/yyyy</b>", parse_mode='html')
+                                           "<b>Date: dd/mm/yy</b>", parse_mode='html')
 
 
-@bot.message_handler(regexp=('Date: (1[0-2]|0?[1-9]|3[0-1])\/(0?[0-9]|1[0-2])\/(20[2-9][1-9])'))
+@bot.message_handler(regexp=('Date: (1[0-2]|0?[1-9]|3[0-1])\/(0?[0-9]|1[0-2])\/([2-9][1-9])'))
 def add_event_date(message):
     status, erormes = check_user_as_admin(message.from_user.id)
     if not status:
