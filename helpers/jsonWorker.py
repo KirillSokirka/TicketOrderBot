@@ -1,5 +1,5 @@
 import json
-from s3manager import S3Manager
+from helpers.s3manager import S3Manager
 from config import EVENTS_KEY, TICKETS_KEY
 
 class JSONWorker:
