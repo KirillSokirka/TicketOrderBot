@@ -1,5 +1,6 @@
 import json
-
+from s3manager import S3Manager
+from config import EVENTS_KEY, TICKETS_KEY
 
 class JSONWorker:
 
@@ -11,6 +12,12 @@ class JSONWorker:
         :param parameter: parameter which value in every object we intersted in
         :return: look upper
         """
+        temp = ''
+        if json_filename == 'jsom_files/tickets.json':
+            temp = TICKETS_KEY
+        else:
+            temp = EVENTS_KEY
+        S3Manager.download_object(json_filename, temp)
         parameters = []
         with open(json_filename, 'r') as file:
             data = json.loads(file.read())
@@ -27,6 +34,12 @@ class JSONWorker:
         :param key: key value
         :return:
         """
+        temp = ''
+        if json_filename == 'jsom_files/tickets.json':
+            temp = TICKETS_KEY
+        else:
+            temp = EVENTS_KEY
+        S3Manager.download_object(json_filename, temp)
         objs = []
         with open(json_filename, 'r') as file:
             data = json.loads(file.read())
@@ -43,6 +56,12 @@ class JSONWorker:
         :param param: name of parameter
         :return: event
         """
+        temp = ''
+        if json_filename == 'jsom_files/tickets.json':
+            temp = TICKETS_KEY
+        else:
+            temp = EVENTS_KEY
+        S3Manager.download_object(json_filename, temp)
         with open(json_filename, 'r') as file:
             data = json.loads(file.read())
             for event in data:
@@ -59,6 +78,12 @@ class JSONWorker:
         :param id: id of event
         :return: value of needed param
         """
+        temp = ''
+        if json_filename == 'jsom_files/tickets.json':
+            temp = TICKETS_KEY
+        else:
+            temp = EVENTS_KEY
+        S3Manager.download_object(json_filename, temp)
         with open(json_filename, 'r') as file:
             data = json.loads(file.read())
             for event in data:
@@ -75,6 +100,12 @@ class JSONWorker:
         :param value: value to check uniquness
         :return: false or true, it depends
         """
+        temp = ''
+        if json_filename == 'jsom_files/tickets.json':
+            temp = TICKETS_KEY
+        else:
+            temp = EVENTS_KEY
+        S3Manager.download_object(json_filename, temp)
         with open(json_filename, 'r') as file:
             data = json.loads(file.read())
             for event in data:
@@ -93,6 +124,12 @@ class JSONWorker:
         :param new_value: new value
         :return: True if everything correct
         """
+        temp = ''
+        if json_filename == 'jsom_files/tickets.json':
+            temp = TICKETS_KEY
+        else:
+            temp = EVENTS_KEY
+        S3Manager.download_object(json_filename, temp)
         with open(json_filename, 'r') as file:
             data = json.loads(file.read())
             for obj in data:
@@ -102,12 +139,21 @@ class JSONWorker:
         with open(json_filename, 'w') as file:
             file.seek(0)
             json.dump(data, file, indent=2)
+        S3Manager.upload_object(json_filename, temp)
         return True
 
     @staticmethod
     def save_to_json(filename, obj):
+        temp = ''
+        if filename == 'jsom_files/tickets.json':
+            temp = TICKETS_KEY
+        else:
+            temp = EVENTS_KEY
+        S3Manager.download_object(filename, temp)
         with open(filename, "r+") as f:
             data = json.load(f)
             data.append(obj.__dict__())
             f.seek(0)
             json.dump(data, f, indent=2)
+        S3Manager.upload_object(filename, temp)
+
