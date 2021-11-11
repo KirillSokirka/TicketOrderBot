@@ -38,6 +38,10 @@ def start(message):
 
 @bot.message_handler(commands=['register'])
 def register(message):
+    user = User.query.filter_by(id=message.from_user.id).first()
+    if user:
+        bot.send_message(message.from_user.id, 'Ви вже зареєстровані!')
+        return
     bot.send_message(message.from_user.id,
                      'Ввведіть свій email: example@exmpl.ex</b>',
                      parse_mode='html')

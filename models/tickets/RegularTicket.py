@@ -16,7 +16,7 @@ class RegularTicket(Ticket):
 
     @price.setter
     def price(self, value):
-        if not isinstance(value, int):
+        if not isinstance(value, float):
             raise TypeError
         if value <= 0:
             raise ValueError

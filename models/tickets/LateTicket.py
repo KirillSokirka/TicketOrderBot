@@ -19,11 +19,11 @@ class LateTicket(Ticket):
     def price(self, value):
         list_of_id = JSONWorker.get_values_by_parameter_name('json_files/tickets.json', 'id')
         if not list_of_id or self.id not in list_of_id:
-            if not isinstance(value, int):
+            if not isinstance(value, float):
                 raise TypeError
             if value <= 0:
                 raise ValueError
-            self.__price = int(value + 0.1 * value)
+            self.__price = value + 0.1 * value
         else:
             self.__price = value
 

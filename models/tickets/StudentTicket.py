@@ -17,11 +17,11 @@ class StudentTicket(Ticket):
     def price(self, value):
         ids = JSONWorker.get_values_by_parameter_name('json_files/tickets.json', 'id')
         if not ids or self.id not in ids:
-            if not isinstance(value, int):
+            if not isinstance(value, float):
                 raise TypeError
             if value <= 0:
                 raise ValueError
-            self.__price = int(0.5 * value)
+            self.__price = 0.5 * value
         else:
             self.__price = value
 
