@@ -2,28 +2,37 @@ import json
 from helpers.s3manager import S3Manager
 from config import EVENTS_KEY, TICKETS_KEY
 
+
 class JSONWorker:
 
     @staticmethod
-    def get_list_of_parameter_values(json_filename, parameter):
+    def get_values_by_parameter_name(json_filename, parameter):
         """
-        return all values which is connected with this parametr
+        return all values which is connected with this parameter
         :param json_filename: file to get json_data_from
-        :param parameter: parameter which value in every object we intersted in
+        :param parameter: parameter which value in every object we interested in
         :return: look upper
         """
-        temp = ''
-        if json_filename == 'json_files/tickets.json':
-            temp = TICKETS_KEY
-        else:
-            temp = EVENTS_KEY
-        S3Manager.download_object(json_filename, temp)
         parameters = []
         with open(json_filename, 'r') as file:
             data = json.loads(file.read())
             for param in data:
                 parameters.append(param[parameter])
         return parameters
+
+    @staticmethod
+    def get_all_objects(json_filename):
+        """
+        Func to get all objects in specified json
+        :param json_filename: name of json_file
+        :return: list of objects in dict form
+        """
+        objs = []
+        with open(json_filename, 'r') as file:
+            data = json.loads(file.read())
+            for obj in data:
+                objs.append(obj)
+        return objs
 
     @staticmethod
     def get_list_of_object_by_key(json_filename, parameter_name, key):
@@ -34,12 +43,6 @@ class JSONWorker:
         :param key: key value
         :return:
         """
-        temp = ''
-        if json_filename == 'json_files/tickets.json':
-            temp = TICKETS_KEY
-        else:
-            temp = EVENTS_KEY
-        S3Manager.download_object(json_filename, temp)
         objs = []
         with open(json_filename, 'r') as file:
             data = json.loads(file.read())
@@ -49,46 +52,34 @@ class JSONWorker:
         return objs
 
     @staticmethod
-    def get_event_by_param_value(json_filename, param, value):
+    def get_object_by_key(json_filename, param, value):
         """
-        will correctly works only with id and name
+        returns a object by one of it parameter value
         :param json_file: file to get json_data_from
         :param param: name of parameter
-        :return: event
+        :return: object
         """
-        temp = ''
-        if json_filename == 'json_files/tickets.json':
-            temp = TICKETS_KEY
-        else:
-            temp = EVENTS_KEY
-        S3Manager.download_object(json_filename, temp)
         with open(json_filename, 'r') as file:
             data = json.loads(file.read())
-            for event in data:
-                if event[param] == value:
-                    return event
+            for d in data:
+                if d[param] == value:
+                    return d
         return None
 
     @staticmethod
-    def get_value_by_event_id(json_filename, name_of_param, id):
+    def get_object_value(json_filename, name_of_param, id):
         """
         returns a value of param from event with id
         :param json_filename: file to get json_data_from
         :param name_of_param: name of param which value u need
-        :param id: id of event
+        :param id: id of object
         :return: value of needed param
         """
-        temp = ''
-        if json_filename == 'json_files/tickets.json':
-            temp = TICKETS_KEY
-        else:
-            temp = EVENTS_KEY
-        S3Manager.download_object(json_filename, temp)
         with open(json_filename, 'r') as file:
             data = json.loads(file.read())
-            for event in data:
-                if event['id'] == id:
-                    return event[name_of_param]
+            for d in data:
+                if d['id'] == id:
+                    return d[name_of_param]
         return None
 
     @staticmethod
@@ -101,11 +92,6 @@ class JSONWorker:
         :return: false or true, it depends
         """
         temp = ''
-        if json_filename == 'json_files/tickets.json':
-            temp = TICKETS_KEY
-        else:
-            temp = EVENTS_KEY
-        S3Manager.download_object(json_filename, temp)
         with open(json_filename, 'r') as file:
             data = json.loads(file.read())
             for event in data:
@@ -154,6 +140,6 @@ class JSONWorker:
             data = json.load(f)
             data.append(obj.__dict__())
             f.seek(0)
-            json.dump(data, f, indent=2)
+            json.dump(data, f, ensure_ascii=False, indent=2)
         S3Manager.upload_object(filename, temp)
 

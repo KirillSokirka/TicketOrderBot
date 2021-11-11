@@ -17,7 +17,7 @@ class LateTicket(Ticket):
 
     @price.setter
     def price(self, value):
-        list_of_id = JSONWorker.get_list_of_parameter_values('json_files/tickets.json', 'id')
+        list_of_id = JSONWorker.get_values_by_parameter_name('json_files/tickets.json', 'id')
         if not list_of_id or self.id not in list_of_id:
             if not isinstance(value, int):
                 raise TypeError

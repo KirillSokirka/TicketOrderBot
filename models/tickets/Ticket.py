@@ -1,7 +1,7 @@
+from helpers.jsonWorker import JSONWorker
+
 import re
 from datetime import datetime
-
-from helpers.jsonWorker import JSONWorker
 
 
 class Ticket:
@@ -22,7 +22,7 @@ class Ticket:
     @id.setter
     def id(self, value):
         if value not in Ticket.__list_of_codes:
-            codes = JSONWorker.get_list_of_parameter_values(Ticket.__filename, 'id')
+            codes = JSONWorker.get_values_by_parameter_name(Ticket.__filename, 'id')
             if not codes:
                 self.__id = f"{1}_{self.id_of_event}"
             else:
@@ -40,7 +40,7 @@ class Ticket:
     def id_of_event(self, value):
         if not isinstance(value, int):
             raise TypeError
-        if value not in JSONWorker.get_list_of_parameter_values('json_files/events.json', 'event_id'):
+        if value not in JSONWorker.get_values_by_parameter_name('json_files/events.json', 'id'):
             raise ValueError
         self.__id_of_event = value
 
@@ -63,8 +63,8 @@ class Ticket:
     @date_of_buy.setter
     def date_of_buy(self, value):
         if isinstance(value, str):
-            if re.match('(1[0-2]|0?[1-9]|3[0-1])\/(0?[0-9]|1[0-2])\/([2-9][1-9])', value):
-                self.__date_of_buy = datetime.strptime(value, '%d/%m/%y')
+            if re.match('(0?[1-9]|[12][0-9]|3[0-1])\/(0?[0-9]|1[0-2])\/(20[2-9][1-9])', value):
+                self.__date_of_buy = datetime.strptime(value, '%d/%m/%Y')
                 return
         elif not isinstance(value, datetime):
             raise TypeError
@@ -75,5 +75,5 @@ class Ticket:
             'id' : self.__id,
             'event_id' : self.__id_of_event,
             'name_of_buyer' : self.__name_of_buyer,
-            'date_of_buy' : self.__date_of_buy.strftime("%d/%m/%y"),
+            'date_of_buy' : self.__date_of_buy.strftime("%d/%m/%Y"),
         }

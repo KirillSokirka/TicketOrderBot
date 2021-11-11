@@ -1,18 +1,66 @@
 [
   {
-    "id": "1_2",
-    "event_id": 2,
+    "id": "1_1",
+    "event_id": 1,
     "name_of_buyer": "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
-    "date_of_buy": "11/11/21",
-    "price": 20,
+    "date_of_buy": "11/11/2021",
+    "price": 60,
+    "type": "advance_ticket"
+  },
+  {
+    "id": "2_2",
+    "event_id": 2,
+    "name_of_buyer": "ioango",
+    "date_of_buy": "11/11/2021",
+    "price": 32,
+    "type": "regular_ticket"
+  },
+  {
+    "id": "3_2",
+    "event_id": 2,
+    "name_of_buyer": "ioango",
+    "date_of_buy": "11/11/2021",
+    "price": 16,
     "type": "student_ticket"
   },
   {
-    "id": "2_3",
+    "id": "4_2",
+    "event_id": 2,
+    "name_of_buyer": "ioango",
+    "date_of_buy": "11/11/2021",
+    "price": 32,
+    "type": "regular_ticket"
+  },
+  {
+    "id": "5_1",
+    "event_id": 1,
+    "name_of_buyer": "ioango",
+    "date_of_buy": "11/11/2021",
+    "price": 160,
+    "type": "student_ticket"
+  },
+  {
+    "id": "6_3",
     "event_id": 3,
-    "name_of_buyer": "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
-    "date_of_buy": "11/11/21",
-    "price": 60,
-    "type": "advance_ticket"
+    "name_of_buyer": "ioango",
+    "date_of_buy": "11/11/2021",
+    "price": 0,
+    "type": "student_ticket"
+  },
+  {
+    "id": "7_3",
+    "event_id": 3,
+    "name_of_buyer": "ioango",
+    "date_of_buy": "11/11/2021",
+    "price": 0,
+    "type": "student_ticket"
+  },
+  {
+    "id": "8_3",
+    "event_id": 3,
+    "name_of_buyer": "ioango",
+    "date_of_buy": "11/11/2021",
+    "price": 0,
+    "type": "student_ticket"
   }
 ]

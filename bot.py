@@ -1,5 +1,7 @@
+import re
+
 from config import *
-from models.Event import Event, EventForDeserialization
+from models.Event import Event
 from models.User import User
 from models.tickets.RegularTicket import RegularTicket
 from models.tickets.StudentTicket import StudentTicket
@@ -16,11 +18,13 @@ from flask import request
 
 
 bot = telebot.TeleBot(BOT_TOKEN)
+
 event = Event()
 student_status = ''
 
 S3Manager.upload_object('json_files/tickets.json', TICKETS_KEY)
 S3Manager.upload_object('json_files/events.json', EVENTS_KEY)
+
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -35,28 +39,103 @@ def start(message):
 @bot.message_handler(commands=['register'])
 def register(message):
     bot.send_message(message.from_user.id,
-                     'Ввведіть свій email за форматом: <b>Email: example@exmpl.ex</b>',
+                     'Ввведіть свій email: example@exmpl.ex</b>',
                      parse_mode='html')
+    bot.register_next_step_handler(message, complete_registration)
 
 
-@bot.message_handler(regexp=('Email: [A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}'))
 def complete_registration(message):
-    mail = message.text.split(' ')[1]
-    user = User(id=message.from_user.id, username=message.from_user.first_name, email=mail)
+    if not re.match('[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}', message.text):
+        bot.send_message(message.from_user.id, 'Некоректний email, спробуй ще')
+        bot.register_next_step_handler(message, complete_registration)
+    user = User(id=message.from_user.id, username=message.from_user.first_name, email=message.text)
     db.session.add(user)
     db.session.commit()
     bot.send_message(message.from_user.id, "Реєстрація пройшла успішно!\n"
                                            "Тепер ви можете приступити до покупки квитків")
 
 
-@bot.message_handler(commands=['admin'])
-def start_as_admin(message):
+@bot.message_handler(commands=['buy'])
+def start_buying(message):
+    S3Manager.download_object('json_files/events.json', EVENTS_KEY)
+    S3Manager.download_object('json_files/tickets.json', TICKETS_KEY)
+    names = JSONWorker.get_values_by_parameter_name('json_files/events.json', 'name')
+    if len(names) == 0:
+        bot.send_message(message.from_user.id, "На жаль, поки немає доступних івентів")
+        return None
+    keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True, row_width=1)
+    keyboard.add(types.KeyboardButton(text='Так'))
+    keyboard.add(types.KeyboardButton(text='Ні'))
+    bot.send_message(message.from_user.id, 'Ти студент?', reply_markup=keyboard)
+    bot.register_next_step_handler(message, choose_event)
+
+
+def choose_event(message):
+    global student_status
+    student_status = message.text
+    names = JSONWorker.get_values_by_parameter_name('json_files/events.json', 'name')
+    keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True, row_width=1)
+    for name in names:
+        keyboard.add(types.KeyboardButton(text=name))
+    message = bot.send_message(message.from_user.id, 'Обери подію, яку хочеш відвідати: ', reply_markup=keyboard)
+    bot.register_next_step_handler(message, get_info_about_event)
+
+
+def get_info_about_event(message):
+    chosen_event_dict = JSONWorker.get_object_by_key('json_files/events.json', 'name', message.text)
+    bot.send_message(message.from_user.id, 'Івент:\n'
+                                           f'<b>Назва</b> - {chosen_event_dict["name"]}\n'
+                                           f'<b>Дата проведення</b> - {chosen_event_dict["date"]}\n'
+                                           f'<b>Початкова вартість квитка</b> - {chosen_event_dict["ticket_cost"]}\n'
+                                           f'<b>Кількість подій</b> - {chosen_event_dict["number_of_tickets"]}'
+                     ,parse_mode='html')
+    if chosen_event_dict['number_of_tickets'] == 0:
+        bot.send_message(message.from_user.id, "На жаль, всі квитки на цю подію були розкуплені")
+        return None
+    sell_ticket(message.from_user.id, message.from_user.first_name, chosen_event_dict)
+
+
+def sell_ticket(chat_id, first_name, event_dict):
+    JSONWorker.update_value(json_filename='json_files/events.json',
+                            name_of_key_value='id',
+                            obj_id_to_update=event_dict['id'],
+                            name_to_update='number_of_tickets',
+                            new_value=event_dict['number_of_tickets'] - 1)
+    ticket = ticket_factory(event_dict, first_name, student_status)
+    JSONWorker.save_to_json('json_files/tickets.json', ticket)
+    S3Manager.upload_object('json_files/tickets.json', TICKETS_KEY)
+    bot.send_message(chat_id, f'Ось твій квиток:\n{ticket.__str__()}', parse_mode='html')
+    bot.send_message(chat_id, 'Щоб подивитися список всіх куплених квитків, обери команду: <b>/tickets</b>',
+                     parse_mode='html')
+
+
+def ticket_factory(_event, user_name, student_status):
+    if student_status == 'Так':
+        return StudentTicket(_event['ticket_cost'], _event['id'], user_name, datetime.today())
+    date_of_event = datetime.strptime(_event['date'], '%d/%m/%Y')
+    event_date = date(date_of_event.year, date_of_event.month, date_of_event.day)
+    delta = abs(date.today() - event_date)
+    if delta.days > 60:
+        return AdvanceTicket(_event['ticket_cost'], _event['id'], user_name, datetime.today())
+    if delta.days <= 10:
+        return LateTicket(_event['ticket_cost'], _event['id'], user_name, datetime.today())
+    return RegularTicket(_event['ticket_cost'], _event['id'], user_name, datetime.today())
+
+
+@bot.message_handler(commands=['events'])
+def get_all_events(message):
     user = User.query.filter_by(id=message.from_user.id).first()
     if not user:
         bot.send_message(message.from_user.id, "Спочатку зареєструйся")
         return None
-    bot.send_message(message.from_user.id, "Введи данні, щоб продовжити як адмінстратор, за форматом:\n"
-                                           "Admin: username|Password: ****")
+    list_of_events_dict = JSONWorker.get_all_objects('json_files/events.json')
+    if len(list_of_events_dict) == 0:
+        bot.send_message(message.from_user.id, 'На жаль, поки немає доступних івентів :(')
+    events = []
+    for event_dict in list_of_events_dict:
+        events.append(Event(**event_dict))
+    for event in events:
+        bot.send_message(message.from_user.id, event.__str__(), parse_mode='html')
 
 
 @bot.message_handler(commands=['tickets'])
@@ -72,12 +151,12 @@ def get_all_tickets(message):
     bot.send_message(message.from_user.id, 'Твої квитки:')
     obj_list = []
     for ticket_dict in list_of_tickets_dict:
-        obj_list.append(DeserializeTickets(ticket_dict, ticket_dict['type']))
+        obj_list.append(deserialize_tickets(ticket_dict, ticket_dict['type']))
     for obj in obj_list:
         bot.send_message(message.from_user.id, obj.__str__(), parse_mode='html')
 
 
-def DeserializeTickets(tickets_dict, type):
+def deserialize_tickets(tickets_dict, type):
     if type == 'regular_ticket':
         return RegularTicket(**tickets_dict)
     elif type == 'student_ticket':
@@ -87,100 +166,98 @@ def DeserializeTickets(tickets_dict, type):
     elif type == 'late_ticket':
         return LateTicket(**tickets_dict)
 
-@bot.message_handler(regexp=('Admin: admin|Password: admin'))
-def create_event(message):
+
+@bot.message_handler(commands=['admin'])
+def start_admin_registration(message):
     user = User.query.filter_by(id=message.from_user.id).first()
     if not user:
         bot.send_message(message.from_user.id, "Спочатку зареєструйся")
         return None
+    bot.send_message(message.from_user.id, "Введи данні, щоб продовжити як адмінстратор, за форматом:\n"
+                                           "Admin: username|Password: ****")
+    bot.register_next_step_handler(message, register_as_admin)
+
+
+def register_as_admin(message):
+    user = User.query.filter_by(id=message.from_user.id).first()
+    if not user:
+        bot.send_message(message.from_user.id, "Спочатку зареєструйся")
+        return None
+    if not re.match('Admin: admin|Password: admin',message.text):
+        bot.send_message(message.from_user.id, 'Ви ввели некоректні данні, спробуйте ще раз, почавши процес реєстрації знову')
+        return None
     user.admin = True
     db.session.commit()
-    bot.send_message(message.from_user.id, "Введіть назву івенту за форматом:\n"
-                                           "<b>EventName: event_name</b>", parse_mode='html')
+    bot.send_message(message.from_user.id, 'Вітаю Вас, тепер ви можете створювати події')
 
 
-@bot.message_handler(regexp=('EventName: \w+'))
+@bot.message_handler(commands=['create_event'])
+def create_event(message):
+    status, erormes = check_user_as_admin(message.from_user.id)
+    if not status:
+        bot.send_message(message.from_user.id, erormes)
+        return None
+    bot.send_message(message.from_user.id, "Введіть назву івенту:")
+    bot.register_next_step_handler(message, add_event_name)
+
+
 def add_event_name(message):
-    status, erormes = check_user_as_admin(message.from_user.id)
-    if not status:
-        bot.send_message(message.from_user.id, erormes)
-        return None
-    event_name = ' '.join(message.text.split(' ')[1::])
     try:
-        event.name = event_name
-    except Exception as e:
-        bot.send_message(message.from_user.id, "Щось пішло не так, спробуй ще" + e.__str__())
-    bot.send_message(message.from_user.id, "Введіть кількіст квитків за форматом:\n"
-                                           "<b>NumberOfTickets: number</b>", parse_mode='html')
-
-
-@bot.message_handler(regexp=('NumberOfTickets: [0-9]+'))
-def add_event_number_of_tickets(message):
-    status, erormes = check_user_as_admin(message.from_user.id)
-    if not status:
-        bot.send_message(message.from_user.id, erormes)
-        return None
-    number_of_ticket = message.text.split(' ')[1]
-    try:
-        event.number_of_tickets = number_of_ticket
+        global event
+        event.name = message.text
     except Exception as e:
         bot.send_message(message.from_user.id, "Щось пішло не так, спробуй ще")
-        return None
-    bot.send_message(message.from_user.id, "Введіть вартість квитка:\n"
-                                           "<b>Price: number</b>", parse_mode='html')
+        bot.register_next_step_handler(message, add_event_name)
+        return
+    bot.send_message(message.from_user.id, "Введіть кількість квитків: ")
+    bot.register_next_step_handler(message, add_event_number_of_tickets)
 
 
-@bot.message_handler(regexp='Price: [0-9]+')
 def add_event_number_of_tickets(message):
-    status, erormes = check_user_as_admin(message.from_user.id)
-    if not status:
-        bot.send_message(message.from_user.id, erormes)
-        return None
-    price = message.text.split(' ')[1]
     try:
-        event.ticket_cost = price
+        global event
+        event.number_of_tickets = message.text
     except Exception as e:
         bot.send_message(message.from_user.id, "Щось пішло не так, спробуй ще")
-        return None
+        bot.register_next_step_handler(message, add_event_number_of_tickets)
+        return
+    bot.send_message(message.from_user.id, "Введіть вартість одного квитка:")
+    bot.register_next_step_handler(message, add_event_cost_of_tickets)
+
+
+def add_event_cost_of_tickets(message):
+    try:
+        global event
+        event.ticket_cost = message.text
+    except Exception as e:
+        bot.send_message(message.from_user.id, "Щось пішло не так, спробуй ще")
+        bot.register_next_step_handler(message, add_event_number_of_tickets)
+        return
     bot.send_message(message.from_user.id, "Введіть дату проведення за форматом:\n"
-                                           "<b>Date: dd/mm/yy</b>", parse_mode='html')
+                                           "<b>dd/mm/yyyy</b>", parse_mode='html')
+    bot.register_next_step_handler(message, add_event_date)
 
 
-@bot.message_handler(regexp=('Date: (0?[1-9]|2[0-9]|3[0-1])\/(0?[1-9]|1[0-2])\/([2-9][1-9])'))
 def add_event_date(message):
     status, erormes = check_user_as_admin(message.from_user.id)
     if not status:
         bot.send_message(message.from_user.id, erormes)
-        return None
-    date_in_string = message.text.split(' ')[1]
+        return
     try:
-        event.date = datetime.strptime(date_in_string, '%d/%m/%y')
+        event.date = message.text
     except Exception:
         bot.send_message(message.from_user.id, "Щось пішло не так, спробуй ще")
-        return None
-    bot.send_message(message.from_user.id, 'Якщо ти вніс усю необхідну інформацію, введи <b>admin --save</b>, '
-                     'щоб зберегти подію', parse_mode='html')
-
-
-@bot.message_handler(regexp='admin --save')
-def save_ivent(message):
-    id = message.from_user.id
-    status, eror_mess = check_user_as_admin(id)
-    if not status:
-        bot.send_message(id, eror_mess)
-        return None
-    if event.name is None:
-        bot.send_message(id, "У події немає назви, зроби з цим щось")
-        return None
-    if event.date is None:
-        bot.send_message(id, "Цікаво, івент без дати, ти впевнений, що все з тобою добре, введи, будь ласка, дату"
-                             " і сходи до лікаря)")
-        return None
-    if event.number_of_tickets is None:
-        bot.send_message(id, "Введи, будь ласка, кількість квитків)")
-        return None
-    JSONWorker.save_to_json('json_files/events.json', event)
-    S3Manager.upload_object('json_files/events.json', EVENTS_KEY)
+        bot.register_next_step_handler(message, add_event_date)
+        return
+    try:
+        JSONWorker.save_to_json('json_files/events.json', event)
+        S3Manager.upload_object('json_files/events.json', EVENTS_KEY)
+    except Exception as e:
+        bot.send_message(message.from_user.id, "Під час збереження івенту щось пішло не так, спробуйте трохи пізніше")
+        bot.register_next_step_handler(message, add_event_date)
+        return
+    bot.send_message(message.from_user.id, 'Вітаю івент створено')
+    return
 
 
 def check_user_as_admin(id):
@@ -190,66 +267,6 @@ def check_user_as_admin(id):
     if not user.admin:
         return False, "На жаль, у тебе немає прав на це"
     return True, ''
-
-
-@bot.message_handler(commands=['buy'])
-def start_buying(message):
-    S3Manager.download_object('json_files/events.json', EVENTS_KEY)
-    S3Manager.download_object('json_files/tickets.json', TICKETS_KEY)
-    names = JSONWorker.get_list_of_parameter_values('json_files/events.json', 'name')
-    keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True, row_width=1)
-    keyboard.add(types.KeyboardButton(text='Так'))
-    keyboard.add(types.KeyboardButton(text='Ні'))
-    bot.send_message(message.from_user.id, 'Ти студент?', reply_markup=keyboard)
-    bot.register_next_step_handler(message, choose_event)
-
-
-def choose_event(message):
-    global student_status
-    student_status = message.text
-    names = JSONWorker.get_list_of_parameter_values('json_files/events.json', 'name')
-    keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True, row_width=1)
-    for name in names:
-        keyboard.add(types.KeyboardButton(text=name))
-    bot.send_message(message.from_user.id, 'Обери подію, яку хочеш відвідати: ', reply_markup=keyboard)
-    bot.register_next_step_handler(message, get_info_about_event)
-
-
-def get_info_about_event(message):
-    chosen_event_dict = JSONWorker.get_event_by_param_value('json_files/events.json', 'name', message.text)
-    bot.send_message(message.from_user.id, 'Івент:\n'
-                                           f'<b>Назва</b> - {chosen_event_dict["name"]}\n'
-                                           f'<b>Дата проведення</b> - {chosen_event_dict["date"]}\n'
-                                           f'<b>Початкова вартість квитка</b> - {chosen_event_dict["ticket_cost"]}\n'
-                                           f'<b>Кількість подій</b> - {chosen_event_dict["number_of_tickets"]}'
-                     , parse_mode='html')
-    if chosen_event_dict['number_of_tickets'] == 0:
-        bot.send_message(message.from_user.id, "На жаль, всі квитки на цю подію були розкуплені")
-        return
-    JSONWorker.update_value(json_filename='json_files/events.json',
-                            name_of_key_value='event_id',
-                            obj_id_to_update=chosen_event_dict['event_id'],
-                            name_to_update='number_of_tickets',
-                            new_value=chosen_event_dict['number_of_tickets'] - 1)
-    ticket = ticket_factory(chosen_event_dict, message.from_user.first_name, student_status)
-    JSONWorker.save_to_json('json_files/tickets.json', ticket)
-    S3Manager.upload_object('json_files/tickets.json', TICKETS_KEY)
-    bot.send_message(message.from_user.id, f'Ось твій квиток:\n{ticket.__str__()}', parse_mode='html')
-    bot.send_message(message.from_user.id, 'Щоб подивитися список всіх куплених квитків, обери команду: <b>/tickets</b>',
-                                           parse_mode='html')
-
-
-def ticket_factory(_event, user_name, student_status):
-    if student_status == 'Так':
-        return StudentTicket(_event['ticket_cost'], _event['event_id'], user_name, datetime.today())
-    date_of_event = datetime.strptime(_event['date'], '%d/%m/%y')
-    event_date = date(date_of_event.year, date_of_event.month, date_of_event.day)
-    delta = abs(date.today() - event_date)
-    if delta.days > 60:
-        return AdvanceTicket(_event['ticket_cost'], _event['event_id'], user_name, datetime.today())
-    if delta.days <= 10:
-        return LateTicket(_event['ticket_cost'], _event['event_id'], user_name, datetime.today())
-    return RegularTicket(_event['ticket_cost'], _event['event_id'], user_name, datetime.today())
 
 
 @bot.message_handler(content_types='text')

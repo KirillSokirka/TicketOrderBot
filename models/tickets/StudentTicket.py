@@ -15,7 +15,7 @@ class StudentTicket(Ticket):
 
     @price.setter
     def price(self, value):
-        ids = JSONWorker.get_list_of_parameter_values('json_files/tickets.json', 'id')
+        ids = JSONWorker.get_values_by_parameter_name('json_files/tickets.json', 'id')
         if not ids or self.id not in ids:
             if not isinstance(value, int):
                 raise TypeError

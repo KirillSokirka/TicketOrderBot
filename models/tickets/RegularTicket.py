@@ -37,7 +37,7 @@ class RegularTicket(Ticket):
                f'<b>покупець</b> - {self.name_of_buyer}\n' + \
                f'<b>id івенту</b> - {self.id_of_event}\n' + \
                f'<b>тип квитка</b> - {self.type}\n' + \
-               f'<b>дата покупки</b> - {self.date_of_buy.strftime("%d/%m/%y")}\n' + \
+               f'<b>дата покупки</b> - {self.date_of_buy.strftime("%d/%m/%Y")}\n' + \
                f'<b>ціна</b> - {self.__price}\n'
 
     def __dict__(self):
