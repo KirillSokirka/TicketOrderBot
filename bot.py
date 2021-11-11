@@ -105,7 +105,7 @@ def add_event_name(message):
     if not status:
         bot.send_message(message.from_user.id, erormes)
         return None
-    event_name = message.text.split(' ')[1]
+    event_name = ' '.join(message.text.split(' ')[1::])
     try:
         event.name = event_name
     except Exception as e:
@@ -146,7 +146,7 @@ def add_event_number_of_tickets(message):
                                            "<b>Date: dd/mm/yy</b>", parse_mode='html')
 
 
-@bot.message_handler(regexp=('Date: (1[0-2]|0?[1-9]|3[0-1])\/(0?[0-9]|1[0-2])\/([2-9][1-9])'))
+@bot.message_handler(regexp=('Date: (0?[1-9]|2[0-9]|3[0-1])\/(0?[1-9]|1[0-2])\/([2-9][1-9])'))
 def add_event_date(message):
     status, erormes = check_user_as_admin(message.from_user.id)
     if not status:
@@ -219,7 +219,7 @@ def get_info_about_event(message):
     chosen_event_dict = JSONWorker.get_event_by_param_value('json_files/events.json', 'name', message.text)
     bot.send_message(message.from_user.id, 'Івент:\n'
                                            f'<b>Назва</b> - {chosen_event_dict["name"]}\n'
-                                           f'<b>Дата проведення</b> - {chosen_event_dict["ticket_cost"]}\n'
+                                           f'<b>Дата проведення</b> - {chosen_event_dict["date"]}\n'
                                            f'<b>Початкова вартість квитка</b> - {chosen_event_dict["ticket_cost"]}\n'
                                            f'<b>Кількість подій</b> - {chosen_event_dict["number_of_tickets"]}'
                      , parse_mode='html')

@@ -2,15 +2,22 @@
   {
     "event_id": 1,
     "name": "kpi_open",
-    "number_of_tickets": 27,
+    "number_of_tickets": 25,
     "ticket_cost": 10,
     "date": "20/12/21"
   },
   {
     "event_id": 2,
     "name": "opening",
-    "number_of_tickets": 14,
+    "number_of_tickets": 12,
     "ticket_cost": 40,
     "date": "10/12/22"
+  },
+  {
+    "event_id": 3,
+    "name": "advance event",
+    "number_of_tickets": 29,
+    "ticket_cost": 100,
+    "date": "20/03/22"
   }
 ]

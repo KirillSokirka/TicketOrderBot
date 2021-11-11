@@ -12,7 +12,7 @@ HEROKU_DB = os.getenv('DATABASE_URL')
 EVENTS_KEY = 'events.json'
 TICKETS_KEY = 'tickets.json'
 
-ENV = 'prod'
+ENV = 'dev'
 app = Flask(__name__)
 if ENV == 'dev':
     app.config['SQLALCHEMY_DATABASE_URI'] = LOCAL_DB

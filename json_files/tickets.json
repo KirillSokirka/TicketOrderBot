@@ -1,3 +1,18 @@
 [
-  
+  {
+    "id": "1_2",
+    "event_id": 2,
+    "name_of_buyer": "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+    "date_of_buy": "11/11/21",
+    "price": 20,
+    "type": "student_ticket"
+  },
+  {
+    "id": "2_3",
+    "event_id": 3,
+    "name_of_buyer": "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+    "date_of_buy": "11/11/21",
+    "price": 60,
+    "type": "advance_ticket"
+  }
 ]
