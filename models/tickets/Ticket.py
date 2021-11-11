@@ -9,29 +9,28 @@ class Ticket:
     __filename = 'json_files/tickets.json'
     __list_of_codes = []
 
-    def __init__(self, code, name_of_buyer, id_of_event, date_of_buy):
+    def __init__(self, id, name_of_buyer, id_of_event, date_of_buy):
         self.name_of_buyer = name_of_buyer
         self.id_of_event = id_of_event
         self.date_of_buy = date_of_buy
-        self.code = code
-
+        self.id = id
 
     @property
-    def code(self):
-        return self.__code
+    def id(self):
+        return self.__id
 
-    @code.setter
-    def code(self, value):
+    @id.setter
+    def id(self, value):
         if value not in Ticket.__list_of_codes:
-            codes = JSONWorker.get_list_of_parameter_values(Ticket.__filename, 'code')
+            codes = JSONWorker.get_list_of_parameter_values(Ticket.__filename, 'id')
             if not codes:
-                self.__code = f"{1}_{self.id_of_event}"
+                self.__id = f"{1}_{self.id_of_event}"
             else:
                 parts = codes[-1].split("_")
-                self.__code = f"{int(parts[0]) + 1}_{self.id_of_event}"
-            Ticket.__list_of_codes.append(self.__code)
+                self.__id = f"{int(parts[0]) + 1}_{self.id_of_event}"
+            Ticket.__list_of_codes.append(self.__id)
         else:
-            self.__code = value
+            self.__id = value
 
     @property
     def id_of_event(self):
@@ -73,7 +72,7 @@ class Ticket:
 
     def __dict__(self):
         return {
-            'code' : self.__code,
+            'id' : self.__id,
             'event_id' : self.__id_of_event,
             'name_of_buyer' : self.__name_of_buyer,
             'date_of_buy' : self.__date_of_buy.strftime("%d/%m/%y"),

@@ -5,8 +5,8 @@ class RegularTicket(Ticket):
 
     __filename = 'json_files/tickets.json'
 
-    def __init__(self, price, event_id, name_of_buyer, date_of_buy, type='regular_ticket', code=None):
-        super(RegularTicket, self).__init__(code, name_of_buyer, event_id, date_of_buy)
+    def __init__(self, price, event_id, name_of_buyer, date_of_buy, type='regular_ticket', id=None):
+        super(RegularTicket, self).__init__(id, name_of_buyer, event_id, date_of_buy)
         self.price = price
         self.type = type
 
@@ -33,7 +33,7 @@ class RegularTicket(Ticket):
         self.__type = value
 
     def __str__(self):
-        return f'<b>id</b> - {self.code}\n' + \
+        return f'<b>id</b> - {self.id}\n' + \
                f'<b>покупець</b> - {self.name_of_buyer}\n' + \
                f'<b>id івенту</b> - {self.id_of_event}\n' + \
                f'<b>тип квитка</b> - {self.type}\n' + \

@@ -13,7 +13,7 @@ class JSONWorker:
         :return: look upper
         """
         temp = ''
-        if json_filename == 'jsom_files/tickets.json':
+        if json_filename == 'json_files/tickets.json':
             temp = TICKETS_KEY
         else:
             temp = EVENTS_KEY
@@ -35,7 +35,7 @@ class JSONWorker:
         :return:
         """
         temp = ''
-        if json_filename == 'jsom_files/tickets.json':
+        if json_filename == 'json_files/tickets.json':
             temp = TICKETS_KEY
         else:
             temp = EVENTS_KEY
@@ -57,7 +57,7 @@ class JSONWorker:
         :return: event
         """
         temp = ''
-        if json_filename == 'jsom_files/tickets.json':
+        if json_filename == 'json_files/tickets.json':
             temp = TICKETS_KEY
         else:
             temp = EVENTS_KEY
@@ -79,7 +79,7 @@ class JSONWorker:
         :return: value of needed param
         """
         temp = ''
-        if json_filename == 'jsom_files/tickets.json':
+        if json_filename == 'json_files/tickets.json':
             temp = TICKETS_KEY
         else:
             temp = EVENTS_KEY
@@ -101,7 +101,7 @@ class JSONWorker:
         :return: false or true, it depends
         """
         temp = ''
-        if json_filename == 'jsom_files/tickets.json':
+        if json_filename == 'json_files/tickets.json':
             temp = TICKETS_KEY
         else:
             temp = EVENTS_KEY
@@ -125,7 +125,7 @@ class JSONWorker:
         :return: True if everything correct
         """
         temp = ''
-        if json_filename == 'jsom_files/tickets.json':
+        if json_filename == 'json_files/tickets.json':
             temp = TICKETS_KEY
         else:
             temp = EVENTS_KEY
@@ -145,7 +145,7 @@ class JSONWorker:
     @staticmethod
     def save_to_json(filename, obj):
         temp = ''
-        if filename == 'jsom_files/tickets.json':
+        if filename == 'json_files/tickets.json':
             temp = TICKETS_KEY
         else:
             temp = EVENTS_KEY

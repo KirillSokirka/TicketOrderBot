@@ -4,8 +4,8 @@ from models.tickets.Ticket import Ticket
 
 class StudentTicket(Ticket):
 
-    def __init__(self, price, event_id, name_of_buyer, date_of_buy, type='student_ticket', code=None):
-        super(StudentTicket, self).__init__(code, name_of_buyer, event_id, date_of_buy)
+    def __init__(self, price, event_id, name_of_buyer, date_of_buy, type='student_ticket', id=None):
+        super(StudentTicket, self).__init__(id, name_of_buyer, event_id, date_of_buy)
         self.price = price
         self.type = type
 
@@ -15,8 +15,8 @@ class StudentTicket(Ticket):
 
     @price.setter
     def price(self, value):
-        codes = JSONWorker.get_list_of_parameter_values('json_files/tickets.json', 'code')
-        if not codes or self.code not in codes:
+        ids = JSONWorker.get_list_of_parameter_values('json_files/tickets.json', 'id')
+        if not ids or self.id not in ids:
             if not isinstance(value, int):
                 raise TypeError
             if value <= 0:
@@ -36,7 +36,7 @@ class StudentTicket(Ticket):
         self.__type = value
 
     def __str__(self):
-        return f'<b>id</b> - {self.code}\n' + \
+        return f'<b>id</b> - {self.id}\n' + \
                f'<b>покупець</b> - {self.name_of_buyer}\n' + \
                f'<b>id івенту</b> - {self.id_of_event}\n' + \
                f'<b>тип квитка</b> - {self.type}\n' + \

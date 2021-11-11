@@ -217,6 +217,12 @@ def choose_event(message):
 
 def get_info_about_event(message):
     chosen_event_dict = JSONWorker.get_event_by_param_value('json_files/events.json', 'name', message.text)
+    bot.send_message(message.from_user.id, 'Івент:\n'
+                                           f'<b>Назва</b> - {chosen_event_dict["name"]}\n'
+                                           f'<b>Дата проведення</b> - {chosen_event_dict["ticket_cost"]}\n'
+                                           f'<b>Початкова вартість квитка</b> - {chosen_event_dict["ticket_cost"]}\n'
+                                           f'<b>Кількість подій</b> - {chosen_event_dict["number_of_tickets"]}'
+                     , parse_mode='html')
     if chosen_event_dict['number_of_tickets'] == 0:
         bot.send_message(message.from_user.id, "На жаль, всі квитки на цю подію були розкуплені")
         return
