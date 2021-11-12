@@ -3,6 +3,7 @@ import re
 from config import *
 from models.Event import Event
 from models.fake_models.EventForDeserialization import  EventForDeserialization
+from models.fake_models.TicketForDeserialization import TicketForDeserialization
 from models.User import User
 from models.tickets.RegularTicket import RegularTicket
 from models.tickets.StudentTicket import StudentTicket
@@ -150,23 +151,12 @@ def get_all_tickets(message):
     if len(list_of_tickets_dict) == 0:
         bot.send_message(message.from_user.id, 'Ти ще не купив жодного квитка')
         return None
-    bot.send_message(message.from_user.id, 'Твої квитки:')
     obj_list = []
     for ticket_dict in list_of_tickets_dict:
-        obj_list.append(deserialize_tickets(ticket_dict, ticket_dict['type']))
+        obj_list.append(TicketForDeserialization(**ticket_dict))
+    bot.send_message(message.from_user.id, 'Твої квитки:')
     for obj in obj_list:
         bot.send_message(message.from_user.id, obj.__str__(), parse_mode='html')
-
-
-def deserialize_tickets(tickets_dict, type):
-    if type == 'regular_ticket':
-        return RegularTicket(**tickets_dict)
-    elif type == 'student_ticket':
-        return StudentTicket(**tickets_dict)
-    elif type == 'advance_ticket':
-        return AdvanceTicket(**tickets_dict)
-    elif type == 'late_ticket':
-        return LateTicket(**tickets_dict)
 
 
 @bot.message_handler(commands=['admin'])

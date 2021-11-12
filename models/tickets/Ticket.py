@@ -7,7 +7,6 @@ from datetime import datetime
 class Ticket:
 
     __filename = 'json_files/tickets.json'
-    __list_of_codes = []
 
     def __init__(self, id, name_of_buyer, id_of_event, date_of_buy):
         self.name_of_buyer = name_of_buyer
@@ -21,16 +20,12 @@ class Ticket:
 
     @id.setter
     def id(self, value):
-        if value not in Ticket.__list_of_codes:
-            codes = JSONWorker.get_values_by_parameter_name(Ticket.__filename, 'id')
-            if not codes:
-                self.__id = f"{1}_{self.id_of_event}"
-            else:
-                parts = codes[-1].split("_")
-                self.__id = f"{int(parts[0]) + 1}_{self.id_of_event}"
-            Ticket.__list_of_codes.append(self.__id)
+        codes = JSONWorker.get_values_by_parameter_name(Ticket.__filename, 'id')
+        if not codes:
+            self.__id = f"{1}_{self.id_of_event}"
         else:
-            self.__id = value
+            parts = codes[-1].split("_")
+            self.__id = f"{int(parts[0]) + 1}_{self.id_of_event}"
 
     @property
     def id_of_event(self):
