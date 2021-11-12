@@ -24,9 +24,6 @@ bot = telebot.TeleBot(BOT_TOKEN)
 event = Event()
 student_status = ''
 
-S3Manager.upload_object('json_files/tickets.json', TICKETS_KEY)
-S3Manager.upload_object('json_files/events.json', EVENTS_KEY)
-
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -88,6 +85,7 @@ def choose_event(message):
 
 
 def get_info_about_event(message):
+    S3Manager.download_object('json_files/events.json', EVENTS_KEY)
     chosen_event_dict = JSONWorker.get_object_by_key('json_files/events.json', 'name', message.text)
     _event = EventForDeserialization(**chosen_event_dict)
     bot.send_message(message.from_user.id, 'Івент:\n' + _event.__str__(), parse_mode='html')
@@ -130,6 +128,7 @@ def get_all_events(message):
     if not user:
         bot.send_message(message.from_user.id, "Спочатку зареєструйся")
         return None
+    S3Manager.download_object('json_files/events.json', EVENTS_KEY)
     list_of_events_dict = JSONWorker.get_all_objects('json_files/events.json')
     if len(list_of_events_dict) == 0:
         bot.send_message(message.from_user.id, 'На жаль, поки немає доступних івентів :(')
@@ -147,6 +146,7 @@ def get_all_tickets(message):
     if not user:
         bot.send_message(message.from_user.id, "Спочатку зареєструйся")
         return None
+    S3Manager.download_object('json_files/tickets.json', TICKETS_KEY)
     list_of_tickets_dict = JSONWorker.get_list_of_object_by_key('json_files/tickets.json', 'name_of_buyer', message.from_user.first_name)
     if len(list_of_tickets_dict) == 0:
         bot.send_message(message.from_user.id, 'Ти ще не купив жодного квитка')

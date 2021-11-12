@@ -5,5 +5,12 @@
     "number_of_tickets": 47,
     "ticket_cost": 250.0,
     "date": "20/12/2021"
+  },
+  {
+    "id": 2,
+    "name": "KPI openspace opening",
+    "number_of_tickets": 100,
+    "ticket_cost": 20.0,
+    "date": "12/03/2022"
   }
 ]
