@@ -1,3 +1,3 @@
 # TicketOrderBot
- a telebot made for ordering tickets\n
- link in telegram: http://t.me/TicketOrderBot
+ A telebot made for ordering tickets ^)
+ Link in telegram: http://t.me/TicketOrderBot
