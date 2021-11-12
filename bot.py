@@ -60,6 +60,10 @@ def complete_registration(message):
 
 @bot.message_handler(commands=['buy'])
 def start_buying(message):
+    user = User.query.filter_by(id=message.from_user.id).first()
+    if not user:
+        bot.send_message(message.from_user.id, 'Спочатку зареєеструйся!')
+        return
     S3Manager.download_object('json_files/events.json', EVENTS_KEY)
     S3Manager.download_object('json_files/tickets.json', TICKETS_KEY)
     names = JSONWorker.get_values_by_parameter_name('json_files/events.json', 'name')
