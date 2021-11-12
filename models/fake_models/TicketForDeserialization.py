@@ -1,9 +1,9 @@
 
 class TicketForDeserialization:
 
-    def __init__(self, id, name_of_buyer, id_of_event, date_of_buy, price, type):
+    def __init__(self, id, name_of_buyer, event_id, date_of_buy, price, type):
         self.name_of_buyer = name_of_buyer
-        self.id_of_event = id_of_event
+        self.id_of_event = event_id
         self.date_of_buy = date_of_buy
         self.id = id
         self.price = price
