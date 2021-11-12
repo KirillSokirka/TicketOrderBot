@@ -2,6 +2,7 @@ import re
 
 from config import *
 from models.Event import Event
+from models.fake_models.EventForDeserialization import  EventForDeserialization
 from models.User import User
 from models.tickets.RegularTicket import RegularTicket
 from models.tickets.StudentTicket import StudentTicket
@@ -87,25 +88,21 @@ def choose_event(message):
 
 def get_info_about_event(message):
     chosen_event_dict = JSONWorker.get_object_by_key('json_files/events.json', 'name', message.text)
-    bot.send_message(message.from_user.id, 'Івент:\n'
-                                           f'<b>Назва</b> - {chosen_event_dict["name"]}\n'
-                                           f'<b>Дата проведення</b> - {chosen_event_dict["date"]}\n'
-                                           f'<b>Початкова вартість квитка</b> - {chosen_event_dict["ticket_cost"]}\n'
-                                           f'<b>Кількість подій</b> - {chosen_event_dict["number_of_tickets"]}'
-                     ,parse_mode='html')
-    if chosen_event_dict['number_of_tickets'] == 0:
+    _event = EventForDeserialization(**chosen_event_dict)
+    bot.send_message(message.from_user.id, 'Івент:\n' + _event.__str__(), parse_mode='html')
+    if _event.number_of_tickets == 0:
         bot.send_message(message.from_user.id, "На жаль, всі квитки на цю подію були розкуплені")
         return None
-    sell_ticket(message.from_user.id, message.from_user.first_name, chosen_event_dict)
+    sell_ticket(message.from_user.id, message.from_user.first_name, _event)
 
 
-def sell_ticket(chat_id, first_name, event_dict):
+def sell_ticket(chat_id, first_name, _event : EventForDeserialization):
     JSONWorker.update_value(json_filename='json_files/events.json',
                             name_of_key_value='id',
-                            obj_id_to_update=event_dict['id'],
+                            obj_id_to_update=_event.id,
                             name_to_update='number_of_tickets',
-                            new_value=event_dict['number_of_tickets'] - 1)
-    ticket = ticket_factory(event_dict, first_name, student_status)
+                            new_value=_event.number_of_tickets - 1)
+    ticket = ticket_factory(_event, first_name, student_status)
     JSONWorker.save_to_json('json_files/tickets.json', ticket)
     S3Manager.upload_object('json_files/tickets.json', TICKETS_KEY)
     bot.send_message(chat_id, f'Ось твій квиток:\n{ticket.__str__()}', parse_mode='html')
@@ -115,15 +112,15 @@ def sell_ticket(chat_id, first_name, event_dict):
 
 def ticket_factory(_event, user_name, student_status):
     if student_status == 'Так':
-        return StudentTicket(_event['ticket_cost'], _event['id'], user_name, datetime.today())
-    date_of_event = datetime.strptime(_event['date'], '%d/%m/%Y')
+        return StudentTicket(_event.ticket_cost, _event.id, user_name, datetime.today())
+    date_of_event = datetime.strptime(_event.date, '%d/%m/%Y')
     event_date = date(date_of_event.year, date_of_event.month, date_of_event.day)
     delta = abs(date.today() - event_date)
     if delta.days > 60:
-        return AdvanceTicket(_event['ticket_cost'], _event['id'], user_name, datetime.today())
+        return AdvanceTicket(_event.ticket_cost, _event.id, user_name, datetime.today())
     if delta.days <= 10:
-        return LateTicket(_event['ticket_cost'], _event['id'], user_name, datetime.today())
-    return RegularTicket(_event['ticket_cost'], _event['id'], user_name, datetime.today())
+        return LateTicket(_event.ticket_cost, _event.id, user_name, datetime.today())
+    return RegularTicket(_event.ticket_cost, _event.id, user_name, datetime.today())
 
 
 @bot.message_handler(commands=['events'])
@@ -137,7 +134,8 @@ def get_all_events(message):
         bot.send_message(message.from_user.id, 'На жаль, поки немає доступних івентів :(')
     events = []
     for event_dict in list_of_events_dict:
-        events.append(Event(**event_dict))
+        events.append(EventForDeserialization(**event_dict))
+    bot.send_message(message.from_user.id, 'Доступні івенти: ')
     for event in events:
         bot.send_message(message.from_user.id, event.__str__(), parse_mode='html')
 
